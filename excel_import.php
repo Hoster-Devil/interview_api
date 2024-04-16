@@ -119,6 +119,7 @@ foreach ($data as $row) {
     $html .= '</tr>';
 }
 $html .= '</table>';
+unlink($destination);
 $spreadsheet = new Spreadsheet();
 
 // Get the active sheet
@@ -137,11 +138,11 @@ foreach ($data as $rowData) {
     $row++;
 
 }
-
-$tempFilePath = 'uploads/data.xlsx';
+$file_name = uniqid();
+$tempFilePath = 'uploads/'.$file_name.'.xlsx';
 $writer = new Xlsx($spreadsheet);
 $writer->save($tempFilePath);
-echo $html;
+echo json_encode(["table_data"=>$html,"file_name"=>$tempFilePath]);
 
 ?>
 
