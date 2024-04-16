@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Form</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-6 offset-md-3">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title text-center">Upload File</h5>
+            <form id="uploadForm">
+                <input name="file" type="file" id="fileInput" value="" />
+            </form>
+            <button type="submit" id="submitBtn" class="btn btn-primary btn-block mt-3">Upload</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<button type="submit" id="downloadBtn" class="btn btn-primary btn-block mt-3 mb-3 col-md-6" style="margin-left: 480px;">Extract</button>
+<div id="append_html">
+  
+</div>
+<script>
+
+document.getElementById('submitBtn').addEventListener('click', function(event) {
+  event.preventDefault();
+  var fileInput = document.getElementById('fileInput');
+  var file = fileInput.files[0];
+  var formData = new FormData();
+  formData.append('file', file);
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'excel_import.php', true);
+  xhr.onload = function() {
+      if (xhr.status === 200) {
+          document.getElementById('append_html').innerHTML = xhr.responseText
+      } else {
+          console.error('Request failed: ' + xhr.status);
+      }
+  };
+  xhr.onerror = function() {
+      console.error('Request failed');
+  };
+  xhr.send(formData);
+});
+document.getElementById('downloadBtn').addEventListener('click', function() {
+  var filePath = 'uploads/data.xlsx';
+  var link = document.createElement('a');
+  link.href = filePath;
+  link.setAttribute('download', '');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+  </script>
+</body>
+</html>
