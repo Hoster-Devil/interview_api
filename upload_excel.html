@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Form</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<style>
+    .blue-circle {
+      background-color: blue;
+      color: white;
+      border-radius: 50%;
+      font-size: 20px;
+    }
+    /* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+  height: 300px; /* Adjust height as needed */
+  overflow-y: scroll; /* Add vertical scroll */
+}
+
+/* Style the table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+/* Style the checkbox */
+.checkbox {
+  width: 20px;
+  height: 20px;
+}
+
+.excel{
+  margin-right: 10px;
+    font-size: 20px;
+}
+
+  </style>
+<body>
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-6 offset-md-3">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title text-center">Upload File  <a href="search_keyword_excel.xlsx" download> <i class="fas fa-question-circle blue-circle" title="Excel Template"></i></a></h5>
+
+            <form id="uploadForm">
+                <input name="file" type="file" id="fileInput" value="" />
+            </form>
+            <button type="submit" id="submitBtn" class="btn btn-primary btn-block mt-3">Upload</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button type="submit" id="extract_excel" class="btn btn-primary btn-block mt-3" style="width: 100px;margin-left: 20px;margin-bottom: 10px;display: none;">add</button>
+
+   <a id="well_per_file" download class="float-right excel" style="display: none;">
+     <i class="fas fa-file-excel"></i>
+  </a>   
+
+  <a id="un_per_file" download class="float-right excel" style="display: none;">
+     <i class="fas fa-file-excel"></i>
+  </a>   
+
+  <a id="low_per_file" download class="float-right excel" style="display: none;">
+     <i class="fas fa-file-excel"></i>
+  </a>
+<div class="tab" style="display: none;" id="tab_data">
+    <button class="tablinks active" onclick="openTab(event, 'correct')">Well Performed</button>
+    
+    <button class="tablinks" onclick="openTab(event, 'wrong')">low Performed</button>
+    <button class="tablinks" onclick="openTab(event, 'un_performed_table')">Un Performed</button>
+</div>
+    
+
+
+<div id="correct" class="tabcontent">
+
+</div>
+
+<div id="wrong" class="tabcontent">
+ 
+</div>
+
+<div id="un_performed_table" class="tabcontent">
+ 
+</div>
+<script>
+
+var well_per_file;
+var un_per_file;
+var low_per_file;
+var crt_all_values = [];
+var file_name_excel = [];
+var wrng_all_values=[];
+document.getElementById('submitBtn').addEventListener('click', function(event) {
+  event.preventDefault();
+  var fileInput = document.getElementById('fileInput');
+  var file = fileInput.files[0];
+  var formData = new FormData();
+  formData.append('file', file);
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', 'excel_import.php', true);
+  xhr.onload = function() {
+    var response = JSON.parse(xhr.responseText);
+      if (xhr.status === 200) {
+        if(response.error == 1){
+          document.getElementById('append_html').innerHTML = '';
+          document.getElementById('append_html').innerHTML = response.excel_error_desc;
+        }else{
+          well_per_file = response.well_per_file;
+          un_per_file = response.un_per_file;
+          low_per_file = response.low_per_file;
+          crt_all_values = response.setting_correct_data;
+          wrng_all_values = response.setting_wrng_data;
+          file_name_excel = response.file_name_excel;
+          document.getElementById("tab_data").style.display = "block";
+          document.getElementById('wrong').innerHTML = '';
+          document.getElementById('correct').innerHTML = '';
+          document.getElementById('correct').innerHTML = response.correct_table;
+          document.getElementById('wrong').innerHTML = response.wrng_table;
+          document.getElementById('un_performed_table').innerHTML = response.un_performed_table;
+          document.getElementById("well_per_file").href = well_per_file;
+          document.getElementById("un_per_file").href = un_per_file;
+          document.getElementById("low_per_file").href = low_per_file;
+
+          // var defaultTabName = 'correct';
+          // var defaultTabElement = document.getElementById(defaultTabName);
+          // document.getElementById("correct").click();
+          // if (defaultTabElement) {
+          //     openTab(event, defaultTabName);
+          // }
+        }
+      } else {
+          console.error('Request failed: ' + xhr.status);
+      }
+  };
+  xhr.onerror = function() {
+      console.error('Request failed');
+  };
+  xhr.send(formData);
+});
+// Function to switch between tabs
+function openTab(evt, tabName) {
+ var elements = document.getElementsByClassName("excel");
+
+
+  for (var i = 0; i < elements.length; i++) {
+      elements[i].style.display = "none";
+  }
+
+  if(tabName == 'correct'){
+      document.getElementById("well_per_file").style.display = "block";
+  }else if(tabName == 'wrong'){
+      document.getElementById("low_per_file").style.display = "block";
+  }else if(tabName == 'un_performed_table'){
+      document.getElementById("un_per_file").style.display = "block";
+  }
+
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+   var data_ele=document.getElementById(tabName).style.display = "block";
+
+  evt.currentTarget.className += " active";
+}
+function wrng_data_check(checkbox){
+   var value = checkbox.value;
+  var index = wrng_all_values.indexOf(value);
+  var index_data = crt_all_values.indexOf(value);
+  if (index !== -1) {
+      wrng_all_values.splice(index, 1);
+  }else{
+    wrng_all_values.push(checkbox.value);
+  }
+  if (index_data !== -1) {
+      crt_all_values.splice(index_data, 1);
+  }else{
+    crt_all_values.push(checkbox.value);
+  }
+
+  var checkedCount = 0;
+  var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach(function(checkbox) {
+    if (checkbox.checked) {
+      checkedCount++;
+    }
+  });
+  if(checkedCount != 0){
+    document.getElementById("extract_excel").style.display = "block";
+  }else{
+    document.getElementById("extract_excel").style.display = "none";
+  }
+
+}
+  document.getElementById('extract_excel').addEventListener('click', function(event) {
+    event.preventDefault();
+    var formData = new FormData();
+    formData.append('crt_all_values', crt_all_values);
+    formData.append('wrng_all_values', wrng_all_values);
+    formData.append('file_path', file_name_excel);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'excel_creation.php', true);
+    xhr.onload = function() {
+      var response = JSON.parse(xhr.responseText);
+      well_per_file = response.well_per_file;
+      low_per_file = response.low_per_file;
+      document.getElementById('wrong').innerHTML = '';
+      document.getElementById('correct').innerHTML = '';
+      document.getElementById('correct').innerHTML = response.correct_table;
+      document.getElementById('wrong').innerHTML = response.wrng_table;
+      document.getElementById("well_per_file").href = well_per_file;
+      document.getElementById("low_per_file").href = low_per_file;
+    };
+  xhr.onerror = function() {
+      console.error('Request failed');
+  };
+  xhr.send(formData);
+});
+  </script>
+</body>
+</html>
